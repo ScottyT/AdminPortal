@@ -1,5 +1,9 @@
+using AdminPortal;
+using AdminPortal.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "corsPolicy",
@@ -10,8 +14,13 @@ builder.Services.AddCors(options =>
             .WithMethods("GET");
     });
 });
-// Add services to the container.
-
+builder.Services.AddSingleton<IMongoRepo>(
+    new MongoRepo(
+        builder.Configuration.GetSection("CodeRedDatabase")["ConnectionString"],
+        builder.Configuration.GetSection("CodeRedDatabase")["DatabaseName"]
+    )
+);
+builder.Services.AddSingleton(typeof(IMongoService<,>), typeof(MongoService<,>));
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
